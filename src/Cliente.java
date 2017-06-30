@@ -95,7 +95,6 @@ public class Cliente implements Runnable {
     }
 
 	private String getEnderecoParVizinho() {
-
         // TODO Auto-generated method stub
 		return "192.168.7.106";
 	}
