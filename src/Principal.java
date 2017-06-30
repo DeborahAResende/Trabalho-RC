@@ -4,8 +4,6 @@ import java.io.*;
 
 public class Principal {
 
-
-
 	public static Servidor servidor;
 	public static Cliente cliente;
 	private static Scanner entrada;
