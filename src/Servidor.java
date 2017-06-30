@@ -39,7 +39,7 @@ public class Servidor implements Runnable{
 	private void proverPecas() {
 
 		try {
-			DatagramPacket pacoteRequisicao = new DatagramPacket();
+			DatagramPacket pacoteRequisicao = new DatagramPacket(new byte[256], 0,0);
 			//(new byte[256], 256); //OLHAR TAMANHO INDENTIFICADOR DA PE�A
 			soquete.receive(pacoteRequisicao);//recebeu o nome da pe�a que ter� que mandar
 			String pacoteRecebido=new String(pacoteRequisicao.getData()).trim();
@@ -47,7 +47,7 @@ public class Servidor implements Runnable{
 			//addListaPares(pacoteRequisicao, pacoteRecebido);
 
 			System.out.println("proveu");
-			readPeca();
+			//readPeca();
 
 			//TODO ACHAR A PE�A CERTA
 			byte[] enviar = new byte[25600];
