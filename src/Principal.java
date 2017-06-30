@@ -20,15 +20,15 @@ public class Principal {
         new Thread(servidor).start();
     }
 
-    public static void iniciarCliente(String nomeArquivo) {
-        try {
-            cliente = new Cliente(nomeArquivo);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        new Thread(cliente).start();
-    }
+	public static void iniciarCliente(String nomeArq) {
+		try {
+			cliente = new Cliente(nomeArq);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		new Thread(cliente).start();
+	}
 
     public static void menu() throws Exception {// cliente
         int opcao;
@@ -90,11 +90,13 @@ public class Principal {
         return InetAddress.getLocalHost().getHostAddress();// 127.0.0.1
     }
 
-    public static void main(String[] args) throws Exception {
-        // System.out.println(new File("Transmissoes").getAbsolutePath());
-        // caminho absoluto da pasta Transmissoes
-        iniciarServidor();
-        menu();
-        //System.out.println("saiu");
-    }
+	public static void main(String[] args) throws Exception {
+
+
+		iniciarServidor();
+		Cliente.retornaIpRastreador("foto1.jpg.torrent");
+		menu();
+		System.out.println("saiu");
+
+	}
 }
