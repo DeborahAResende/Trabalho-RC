@@ -1,8 +1,5 @@
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -67,7 +64,7 @@ public class Metadados {
 	}
 
 	public static Metadados criaArquivoMetadados(String ipTracker, int portTracker, String nomeArquivo,
-			String arquivoSaida) throws Exception {
+												 String arquivoSaida) throws Exception {
 		Metadados arquivoMeta = new Metadados();
 
 		arquivoMeta.setIpTracker(ipTracker);
@@ -84,8 +81,6 @@ public class Metadados {
 		Path path = Paths.get(nomeArquivo);
 		// Pacote peg o endereço do arquivo
 		File arquivoDados = path.toFile();
-
-
 		// byte[] bytes=Files.readAllBytes(path);
 		//System.out.println("Existe: " + arquivoDados.exists());
 		//System.out.println(arquivoDados.length());
@@ -134,16 +129,16 @@ public class Metadados {
 		byte[] pecaBytes = new byte[TAMANHO_PECA];
 		// vetor para adicionar o tamanho da peça do arquivo principal
 		// o começo da peça
-		
+
 		inputArquidoDados.seek(offsetBytes);
 		bytesLidos = inputArquidoDados.read(pecaBytes, 0, TAMANHO_PECA);
 		// System.out.println("bytes lidos:" + bytesLidos);
-		
+
 		if(bytesLidos != TAMANHO_PECA){ //ultima peça
 			byte[] ultimaPecaBytes = Arrays.copyOf(pecaBytes, bytesLidos);
 			return ultimaPecaBytes;
 		}
-		else	
+		else
 			return pecaBytes;
 	}
 
@@ -170,7 +165,7 @@ public class Metadados {
 		 * 
 		 * System.out.println(id);
 		 */
-		
+
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("SHA-1");
