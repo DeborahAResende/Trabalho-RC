@@ -64,9 +64,10 @@ public class Cliente implements Runnable {
 			ipServidor = getEnderecoParVizinho();
 			InetAddress enderecoServidor = InetAddress.getByName(ipServidor);
             int indicePeca = sorteiaIndicePeca();
-			DatagramPacket pacoteRequisicao = new DatagramPacket(nomeArquivo.getBytes(), indicePeca,
-            nomeArquivo.length(), enderecoServidor, porto);
+
+            DatagramPacket pacoteRequisicao = new DatagramPacket(nomeArquivo.getBytes(), indicePeca, nomeArquivo.length(), enderecoServidor, porto);
 			soqueteCliente.send(pacoteRequisicao);
+
 			DatagramPacket pacoteResposta = new DatagramPacket(new byte[25600], 25600);
 			soqueteCliente.receive(pacoteResposta);
 
