@@ -24,7 +24,7 @@ public class Cliente implements Runnable {
 	public DatagramSocket soqueteCliente;
 	public String ipServidor; //ip_do_vizinho
 	public boolean clienteTerminou = false;
-	public int porto;
+	public int porto = 1234;
 
 	public Cliente(String nomeArq) throws Exception {
 		this.nomeArq = nomeArq;
@@ -65,7 +65,7 @@ public class Cliente implements Runnable {
 			InetAddress enderecoServidor = InetAddress.getByName(ipServidor);
             int indicePeca = sorteiaIndicePeca();
 			DatagramPacket pacoteRequisicao = new DatagramPacket(nomeArquivo.getBytes(), indicePeca,
-            0, enderecoServidor, porto);
+            nomeArquivo.length(), enderecoServidor, porto);
 			soqueteCliente.send(pacoteRequisicao);
 			DatagramPacket pacoteResposta = new DatagramPacket(new byte[25600], 25600);
 			soqueteCliente.receive(pacoteResposta);
@@ -97,7 +97,7 @@ public class Cliente implements Runnable {
 	private String getEnderecoParVizinho() {
 
         // TODO Auto-generated method stub
-		return null;
+		return "192.168.7.106";
 	}
 
     public void lerArquivo (int comecaLerLinha){

@@ -39,10 +39,14 @@ public class Servidor implements Runnable{
 	private void proverPecas() {
 
 		try {
-			DatagramPacket pacoteRequisicao = new DatagramPacket(new byte[256], 0,0);
-			//(new byte[256], 256); //OLHAR TAMANHO INDENTIFICADOR DA PE�A
+
+            DatagramPacket pacoteRequisicao = new DatagramPacket(new byte[256], 256);
 			soquete.receive(pacoteRequisicao);//recebeu o nome da pe�a que ter� que mandar
-			String pacoteRecebido=new String(pacoteRequisicao.getData()).trim();
+            System.out.println("offset "+pacoteRequisicao.getOffset());
+            String pacoteRecebido=new String(pacoteRequisicao.getData()).trim();
+            System.out.println(pacoteRecebido);
+            //readPeca(pacoteRequisicao.getOffset(), RandomAccessFile );
+
 			System.out.println(pacoteRecebido);
 			//addListaPares(pacoteRequisicao, pacoteRecebido);
 
@@ -66,14 +70,14 @@ public class Servidor implements Runnable{
 		//ListaPares.get(pacoteRecebido.i)
 	}
 
-	public static byte[] readPeca(int pecaID, RandomAccessFile inputArquidoDados) throws IOException {
+	/*public static byte[] readPeca(int pecaID, RandomAccessFile inputArquidoDados) throws IOException {
 
 		int offsetBytes = pecaID * Metadados.TAMANHO_PECA;
 		/*
 		 * input.skip( offsetBytes ); byte[] peca = new byte[tamanhoP];
 		 * input.read(peca); return peca;
 		 */
-		byte[] pecaBytes = new byte[Metadados.TAMANHO_PECA];
+		/*byte[] pecaBytes = new byte[Metadados.TAMANHO_PECA];
 		// vetor para adicionar o tamanho da peça do arquivo principal
 		// o começo da peça
 
@@ -87,6 +91,6 @@ public class Servidor implements Runnable{
 		}
 		else
 			return pecaBytes;
-	}
+	}*/
 
 }
