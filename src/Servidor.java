@@ -1,9 +1,11 @@
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Servidor implements Runnable{
@@ -37,13 +39,16 @@ public class Servidor implements Runnable{
 	private void proverPecas() {
 
 		try {
-			DatagramPacket pacoteRequisicao = new DatagramPacket(new byte[256], 256); //OLHAR TAMANHO INDENTIFICADOR DA PE�A
+			DatagramPacket pacoteRequisicao = new DatagramPacket();
+			//(new byte[256], 256); //OLHAR TAMANHO INDENTIFICADOR DA PE�A
 			soquete.receive(pacoteRequisicao);//recebeu o nome da pe�a que ter� que mandar
 			String pacoteRecebido=new String(pacoteRequisicao.getData()).trim();
 			System.out.println(pacoteRecebido);
-			addListaPares(pacoteRequisicao, pacoteRecebido);
+			//addListaPares(pacoteRequisicao, pacoteRecebido);
 
 			System.out.println("proveu");
+			readPeca();
+
 			//TODO ACHAR A PE�A CERTA
 			byte[] enviar = new byte[25600];
 			DatagramPacket resposta = new DatagramPacket(enviar, enviar.length, pacoteRequisicao.getAddress(), pacoteRequisicao.getPort());
@@ -59,6 +64,29 @@ public class Servidor implements Runnable{
 		ip = ip.substring(1, ip.indexOf(':'));
 		//System.out.println(ip);
 		//ListaPares.get(pacoteRecebido.i)
+	}
+
+	public static byte[] readPeca(int pecaID, RandomAccessFile inputArquidoDados) throws IOException {
+
+		int offsetBytes = pecaID * Metadados.TAMANHO_PECA;
+		/*
+		 * input.skip( offsetBytes ); byte[] peca = new byte[tamanhoP];
+		 * input.read(peca); return peca;
+		 */
+		byte[] pecaBytes = new byte[Metadados.TAMANHO_PECA];
+		// vetor para adicionar o tamanho da peça do arquivo principal
+		// o começo da peça
+
+		inputArquidoDados.seek(offsetBytes);
+		bytesLidos = inputArquidoDados.read(pecaBytes, 0, Metadados.TAMANHO_PECA);
+		// System.out.println("bytes lidos:" + bytesLidos);
+
+		if(bytesLidos != Metadados.TAMANHO_PECA){ //ultima peça
+			byte[] ultimaPecaBytes = Arrays.copyOf(pecaBytes, bytesLidos);
+			return ultimaPecaBytes;
+		}
+		else
+			return pecaBytes;
 	}
 
 }

@@ -60,6 +60,7 @@ public class Metadados {
 		Metadados arquivoMeta = new Metadados();
 		// ler na mesma ordem que foi escrito
 
+
 		return arquivoMeta;
 	}
 
@@ -159,13 +160,6 @@ public class Metadados {
 	}
 
 	public static String geraChave(byte[] novo) throws NoSuchAlgorithmException {
-		//System.out.println("entrou no geraHash");
-		/*
-		 * int id=novo.hashCode();
-		 * 
-		 * System.out.println(id);
-		 */
-
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("SHA-1");
@@ -180,5 +174,4 @@ public class Metadados {
 		}
 		return new String(chars);
 	}
-
 }
