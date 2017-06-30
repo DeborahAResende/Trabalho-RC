@@ -89,14 +89,14 @@ public class Principal {
 				}
 			}
 		}
-		return InetAddress.getLocalHost().getHostAddress();// 127.0.0.1
+		return InetAddress.getLocalHost().getHostAddress();
 	}
 
 	public static void main(String[] args) throws Exception {
 
 
 		iniciarServidor();
-		Cliente.retornaIpRastreador("foto1.jpg.torrent");
+		//Cliente.retornaIpRastreador("foto1.jpg.torrent");
 		menu();
 		System.out.println("saiu");
 
