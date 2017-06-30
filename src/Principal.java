@@ -91,12 +91,7 @@ public class Principal {
     }
 
 	public static void main(String[] args) throws Exception {
-
-
 		iniciarServidor();
-		Cliente.retornaIpRastreador("foto1.jpg.torrent");
 		menu();
-		System.out.println("saiu");
-
 	}
 }
