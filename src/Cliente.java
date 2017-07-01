@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -59,18 +60,28 @@ public class Cliente implements Runnable {
 		}
 	}
 
-	private void solicitaPecas(String nomeArquivo) throws UnknownHostException { // ip e porto como paramentros?
+	private void solicitaPecas(String nomeArquivoTorrent) throws UnknownHostException { // ip e porto como paramentros?
+        int contador=0;
 		try {
-			ipServidor = getEnderecoParVizinho();
-			InetAddress enderecoServidor = InetAddress.getByName(ipServidor);
-            int indicePeca = sorteiaIndicePeca();
+		    if (contador==0){
+                ipServidor = getEnderecoRastreador(nomeArquivoTorrent);
+                InetAddress enderecoServidor = InetAddress.getByName(ipServidor);
+                String nomeArqOriginal = retornaNomeArq(nomeArquivoTorrent);
+                DatagramPacket pacoteRequisicao = new DatagramPacket((nomeArqOriginal).getBytes(), nomeArqOriginal.length(), enderecoServidor, porto);
+                soqueteCliente.send(pacoteRequisicao);
+                contador++;
+            }
 
-            DatagramPacket pacoteRequisicao = new DatagramPacket(nomeArquivo.getBytes(), indicePeca, nomeArquivo.length(), enderecoServidor, porto);
-			soqueteCliente.send(pacoteRequisicao);
+            DatagramPacket pacoteResposta = new DatagramPacket(new byte[256], 256);
+            soqueteCliente.receive( pacoteResposta );
+            String dadosResposta = new String( pacoteResposta.getData() ).trim();
+            System.out.println("Dados resposta: " +dadosResposta);
+            String[] ipPares = dadosResposta.split("-");
+            //System.out.println("Quantidade:" +ipPares.length);
 
-			DatagramPacket pacoteResposta = new DatagramPacket(new byte[25600], 25600);
-			soqueteCliente.receive(pacoteResposta);
-
+			//DatagramPacket pacoteResposta = new DatagramPacket(new byte[25600], 25600);
+			//soqueteCliente.receive(pacoteResposta);
+            clienteTerminou = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -95,9 +106,27 @@ public class Cliente implements Runnable {
         }
     }
 
-	private String getEnderecoParVizinho() {
-        // TODO Auto-generated method stub
-		return "192.168.7.106";
+public static String getEnderecoRastreador(String nomeArqTorrent) {
+        String caminho = new File("").getAbsolutePath();
+        String declaracao;
+        String[] IpPorto = new String[2];
+        String nome="";
+        try {
+            FileReader arq = new FileReader(caminho +"\\"+ nomeArqTorrent);
+            BufferedReader lerArq = new BufferedReader(arq);
+
+            String linha = lerArq.readLine();
+            declaracao = linha.substring(11, linha.length());
+            IpPorto = declaracao.split("-", 2);
+            linha = lerArq.readLine(); // lê da segunda até a última linha
+            nome = linha.substring(5, linha.length());
+
+            arq.close();
+        } catch (IOException e) {
+            System.err.printf("Erro na abertura do arquivo: %s.\n", e.getMessage());
+        }
+        return IpPorto[0];
+
 	}
 
     public void lerArquivo (int comecaLerLinha){
@@ -117,4 +146,24 @@ public class Cliente implements Runnable {
         }
     }
 
+
+    public static String retornaNomeArq(String nomeArqTorrent){
+        String caminho = new File("").getAbsolutePath();
+        String declaracao;
+        String nome="";
+        try {
+            FileReader arq = new FileReader(caminho +"\\"+ nomeArqTorrent);
+            BufferedReader lerArq = new BufferedReader(arq);
+
+            String linha = lerArq.readLine();
+            declaracao = linha.substring(12, linha.length());
+            linha = lerArq.readLine(); // lê da segunda até a última linha
+            nome = linha.substring(5, linha.length());
+
+                arq.close();
+        } catch (IOException e) {
+            System.err.printf("Erro na abertura do arquivo: %s.\n", e.getMessage());
+        }
+        return nome;
+}
 }

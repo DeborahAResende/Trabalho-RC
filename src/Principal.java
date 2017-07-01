@@ -40,10 +40,7 @@ public class Principal {
             opcao = Integer.parseInt(a);
             switch (opcao) {
                 case 1:
-                    entrada = new Scanner(System.in);
-                    System.out.println("Digite o nome do arquivo que deseja receber");
-                    String nomeArq = entrada.next();
-
+                    String nomeArq = JOptionPane.showInputDialog("Digite o nome do arquivo que deseja receber");
                     if(Servidor.verificaExistenciaArquivo(nomeArq)){
                         iniciarCliente(nomeArq);
                     }else{
@@ -92,5 +89,8 @@ public class Principal {
 
 	public static void main(String[] args) throws Exception {
 		iniciarServidor();
+		//System.out.println(Cliente.getEnderecoRastreador("teste.jpg.torrent"));
+		menu();
+
 	}
 }
