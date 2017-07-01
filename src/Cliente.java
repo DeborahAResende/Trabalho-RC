@@ -16,87 +16,103 @@ import java.util.Random;
 
 public class Cliente implements Runnable {
 
-	String endCliente;
-	int portoCliente;
+    String endCliente;
+    int portoCliente;
 
-	public List<String> codigosHash = new ArrayList<>();
-	public List<Integer> pecasPendentes = new ArrayList<>();
-	public String nomeArq;
-	public DatagramSocket soqueteCliente;
-	public String ipServidor; //ip_do_vizinho
-	public boolean clienteTerminou = false;
-	public int porto = 1234;
+    public List<String> codigosHash = new ArrayList<>();
+    public List<Integer> pecasPendentes = new ArrayList<>();
+    public String nomeArq;
+    public DatagramSocket soqueteCliente;
+    public String ipServidor; //ip_do_vizinho
+    public boolean clienteTerminou = false;
+    public int porto = 1234;
 
-	public Cliente(String nomeArq) throws Exception {
-		this.nomeArq = nomeArq;
-		soqueteCliente = new DatagramSocket();
-		endCliente = getIP();
-	}
+    public Cliente(String nomeArq) throws Exception {
+        this.nomeArq = nomeArq;
+        soqueteCliente = new DatagramSocket();
+        endCliente = getIP();
+    }
 
-	private static String getIP() throws UnknownHostException, SocketException {
-		Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces();
-		for (; n.hasMoreElements();) {
-			NetworkInterface e = n.nextElement();
-			Enumeration<InetAddress> a = e.getInetAddresses();
-			for (; a.hasMoreElements();) {
-				InetAddress addr = a.nextElement();
-				if (!addr.getHostAddress().contains("127.0.0.1") && !addr.getHostAddress().contains(":")) {
-					return addr.getHostAddress();
-				}
-			}
-		}
-		return InetAddress.getLocalHost().getHostAddress();// 127.0.0.1
-	}
-
-	@Override
-	public void run() {
-		while (!clienteTerminou) {
-			try {
-				solicitaPecas(nomeArq);
-			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private void solicitaPecas(String nomeArquivoTorrent) throws UnknownHostException { // ip e porto como paramentros?
-        int contador=0;
-		try {
-		    if (contador==0){
-                ipServidor = getEnderecoRastreador(nomeArquivoTorrent);
-                InetAddress enderecoServidor = InetAddress.getByName(ipServidor);
-                String nomeArqOriginal = retornaNomeArq(nomeArquivoTorrent);
-                DatagramPacket pacoteRequisicao = new DatagramPacket((nomeArqOriginal).getBytes(), nomeArqOriginal.length(), enderecoServidor, porto);
-                soqueteCliente.send(pacoteRequisicao);
-                contador++;
+    private static String getIP() throws UnknownHostException, SocketException {
+        Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces();
+        for (; n.hasMoreElements(); ) {
+            NetworkInterface e = n.nextElement();
+            Enumeration<InetAddress> a = e.getInetAddresses();
+            for (; a.hasMoreElements(); ) {
+                InetAddress addr = a.nextElement();
+                if (!addr.getHostAddress().contains("127.0.0.1") && !addr.getHostAddress().contains(":")) {
+                    return addr.getHostAddress();
+                }
             }
+        }
+        return InetAddress.getLocalHost().getHostAddress();// 127.0.0.1
+    }
 
+    @Override
+    public void run() {
+        while (!clienteTerminou) {
+            try {
+                solicitaPecas(nomeArq);
+            } catch (UnknownHostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void solicitaPecas(String nomeArquivoTorrent) throws UnknownHostException { // ip e porto como paramentros?
+
+        try {
+
+            // Passo 1 - Envia uma mensagem p ip do ArqTorrent com #+nomeArqTorrent
+            ipServidor = getEnderecoRastreador(nomeArquivoTorrent);
+            InetAddress enderecoServidor = InetAddress.getByName(ipServidor);
+            String nomeArqOriginal = "#" + retornaNomeArq(nomeArquivoTorrent);
+            DatagramPacket pacoteRequisicao = new DatagramPacket((nomeArqOriginal).getBytes(), nomeArqOriginal.length(), enderecoServidor, porto);
+            soqueteCliente.send(pacoteRequisicao);
+
+            //Recebe como resposta os pares que possuem alguma peça daquele arquivo
             DatagramPacket pacoteResposta = new DatagramPacket(new byte[256], 256);
-            soqueteCliente.receive( pacoteResposta );
-            String dadosResposta = new String( pacoteResposta.getData() ).trim();
-            System.out.println("Dados resposta: " +dadosResposta);
+            soqueteCliente.receive(pacoteResposta);
+            String dadosResposta = new String(pacoteResposta.getData()).trim();
+            System.out.println("Dados resposta: " + dadosResposta);
             String[] ipPares = dadosResposta.split("-");
             //System.out.println("Quantidade:" +ipPares.length);
 
-			//DatagramPacket pacoteResposta = new DatagramPacket(new byte[25600], 25600);
-			//soqueteCliente.receive(pacoteResposta);
+
+            //ARRUMAR ISSO DEPOIS
+            String nomeArqePecas = "$" + retornaNomeArq(nomeArquivoTorrent)+"/0-30";
+            DatagramPacket pacoteRequisicaoPecas = new DatagramPacket((nomeArqePecas).getBytes(), nomeArqePecas.length(), enderecoServidor, porto);
+            soqueteCliente.send(pacoteRequisicaoPecas);
+
+            int i=0;
+            while(i<30){
+                DatagramPacket peca = new DatagramPacket(new byte[1000], 1000);
+                soqueteCliente.receive(peca);
+                System.out.println(peca);
+                i++;
+            }
+
+
+
+            //DatagramPacket pacoteResposta = new DatagramPacket(new byte[25600], 25600);
+            //soqueteCliente.receive(pacoteResposta);
             clienteTerminou = true;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-	public int sorteiaIndicePeca(){
-	    if(this.pecasPendentes.size()>1) {
-            return new Random().nextInt(this.pecasPendentes.size());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-	    return 0;
+
     }
 
-	public void comparaPeca(byte[] recebi){
+    public int sorteiaIndicePeca() {
+        if (this.pecasPendentes.size() > 1) {
+            return new Random().nextInt(this.pecasPendentes.size());
+        }
+        return 0;
+    }
+
+    public void comparaPeca(byte[] recebi) {
         try {
             String hashRecebida = Metadados.geraChave(recebi);
             boolean tem = codigosHash.contains(hashRecebida);
@@ -106,13 +122,13 @@ public class Cliente implements Runnable {
         }
     }
 
-public static String getEnderecoRastreador(String nomeArqTorrent) {
+    public static String getEnderecoRastreador(String nomeArqTorrent) {
         String caminho = new File("").getAbsolutePath();
         String declaracao;
         String[] IpPorto = new String[2];
-        String nome="";
+        String nome = "";
         try {
-            FileReader arq = new FileReader(caminho +"\\"+ nomeArqTorrent);
+            FileReader arq = new FileReader(caminho + "\\" + nomeArqTorrent);
             BufferedReader lerArq = new BufferedReader(arq);
 
             String linha = lerArq.readLine();
@@ -127,32 +143,32 @@ public static String getEnderecoRastreador(String nomeArqTorrent) {
         }
         return IpPorto[0];
 
-	}
+    }
 
-    public void lerArquivo (int comecaLerLinha){
-        int contLinha= 0;
-        try{
-            BufferedReader br = new BufferedReader(new FileReader(nomeArq+".torrent"));
-            while(br.ready()){
-                if(contLinha >= comecaLerLinha) {
+    public void lerArquivo(int comecaLerLinha) {
+        int contLinha = 0;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(nomeArq + ".torrent"));
+            while (br.ready()) {
+                if (contLinha >= comecaLerLinha) {
                     String linha = br.readLine();
                     codigosHash.add(linha);
                 }
                 contLinha++;
             }
             br.close();
-        }catch(IOException ioe){
+        } catch (IOException ioe) {
             ioe.printStackTrace();
         }
     }
 
 
-    public static String retornaNomeArq(String nomeArqTorrent){
+    public static String retornaNomeArq(String nomeArqTorrent) {
         String caminho = new File("").getAbsolutePath();
         String declaracao;
-        String nome="";
+        String nome = "";
         try {
-            FileReader arq = new FileReader(caminho +"\\"+ nomeArqTorrent);
+            FileReader arq = new FileReader(caminho + "\\" + nomeArqTorrent);
             BufferedReader lerArq = new BufferedReader(arq);
 
             String linha = lerArq.readLine();
@@ -160,10 +176,10 @@ public static String getEnderecoRastreador(String nomeArqTorrent) {
             linha = lerArq.readLine(); // lê da segunda até a última linha
             nome = linha.substring(5, linha.length());
 
-                arq.close();
+            arq.close();
         } catch (IOException e) {
             System.err.printf("Erro na abertura do arquivo: %s.\n", e.getMessage());
         }
         return nome;
-}
+    }
 }
