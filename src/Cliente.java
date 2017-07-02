@@ -1,13 +1,12 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -85,11 +84,20 @@ public class Cliente implements Runnable {
             DatagramPacket pacoteRequisicaoPecas = new DatagramPacket((nomeArqePecas).getBytes(), nomeArqePecas.length(), enderecoServidor, porto);
             soqueteCliente.send(pacoteRequisicaoPecas);
 
+            System.out.println("nome: "+nomeArqOriginal);
+            Path path = Paths.get(nomeArqOriginal);
+
+            File arquivoDados = path.toFile();
+            RandomAccessFile arq = new RandomAccessFile(arquivoDados,"rw");
             int i=0;
             while(i<30){
                 DatagramPacket peca = new DatagramPacket(new byte[1000], 1000);
                 soqueteCliente.receive(peca);
+
                 System.out.println(peca);
+                String g = Metadados.geraChave(peca.getData());
+                System.out.println(i + "> " + g);
+               // writePeca(i,peca.getData(),arq);
                 i++;
             }
 
@@ -101,6 +109,8 @@ public class Cliente implements Runnable {
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+           e.printStackTrace();
         }
 
     }
@@ -181,5 +191,12 @@ public class Cliente implements Runnable {
             System.err.printf("Erro na abertura do arquivo: %s.\n", e.getMessage());
         }
         return nome;
+    }
+
+    public static void writePeca(int pecaID, byte[] pecaBytes, RandomAccessFile output) throws IOException {
+        int offsetBytes = pecaID * Metadados.TAMANHO_PECA;
+        output.seek(offsetBytes);
+        output.write(pecaBytes, offsetBytes, Metadados.TAMANHO_PECA);
+        //output.close();
     }
 }
